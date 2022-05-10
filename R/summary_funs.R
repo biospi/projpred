@@ -159,6 +159,8 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       value.se <- weighted.sd(lppd, weights, na.rm = TRUE) /
         sqrt(n_notna)
     }
+    lq <- qnorm(alpha / 2, mean = value, sd = value.se)
+    uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
   } else if (stat == "elpd") {
     if (!is.null(lppd.bs)) {
       value <- sum((lppd - lppd.bs) * weights, na.rm = TRUE)
@@ -169,6 +171,8 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       value.se <- weighted.sd(lppd, weights, na.rm = TRUE) /
         sqrt(n_notna) * n_notna
     }
+    lq <- qnorm(alpha / 2, mean = value, sd = value.se)
+    uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
   } else if (stat == "mse") {
     y <- d_test$y
     if (!is.null(mu.bs)) {
@@ -181,6 +185,8 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       value.se <- weighted.sd((mu - y)^2, weights, na.rm = TRUE) /
         sqrt(n_notna)
     }
+    lq <- qnorm(alpha / 2, mean = value, sd = value.se)
+    uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
   } else if (stat == "rmse") {
     y <- d_test$y
     if (!is.null(mu.bs)) {
@@ -216,6 +222,8 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       )
       value.se <- sd(value.bootstrap)
     }
+    lq <- qnorm(alpha / 2, mean = value, sd = value.se)
+    uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
   } else if (stat == "acc" || stat == "pctcorr") {
     y <- d_test$y
     if (!is.null(mu.bs)) {
@@ -229,6 +237,8 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       value.se <- weighted.sd(round(mu) == y, weights, na.rm = TRUE) /
         sqrt(n_notna)
     }
+    lq <- qnorm(alpha / 2, mean = value, sd = value.se)
+    uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
   } else if (stat == "auc") {
     y <- d_test$y
     auc.data <- cbind(y, mu, weights)
@@ -245,10 +255,9 @@ get_stat <- function(mu, lppd, d_test, stat, mu.bs = NULL, lppd.bs = NULL,
       value.bootstrap <- bootstrap(auc.data, auc, ...)
       value.se <- sd(value.bootstrap, na.rm = TRUE)
     }
+    lq <- quantile(value.bootstrap, probs = alpha / 2, names = F, na.rm = T)
+    uq <- quantile(value.bootstrap, probs = 1 - alpha / 2, names = F, na.rm = T)
   }
-
-  lq <- qnorm(alpha / 2, mean = value, sd = value.se)
-  uq <- qnorm(1 - alpha / 2, mean = value, sd = value.se)
 
   return(list(value = value, se = value.se, lq = lq, uq = uq))
 }
